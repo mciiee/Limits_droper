@@ -1,0 +1,102 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build deps (Ubuntu)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            qt6-base-dev \
+            qt6-base-dev-tools
+
+      - name: Build CLI tools
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -o mchbar_read mchbar_read.c
+          gcc -std=c11 -Wall -Wextra -O2 -o mchbar_pl_write mchbar_pl_write.c
+          gcc -std=c11 -Wall -Wextra -O2 -o limits_ui limits_ui.c -lm
+          gcc -std=c11 -Wall -Wextra -O2 -o limits_helper helper/limits_helper.c -lm
+
+      - name: Build Qt UI
+        run: |
+          cmake -S qt_ui -B qt_ui/build
+          cmake --build qt_ui/build
+
+      - name: Package artifacts
+        run: |
+          set -e
+          TAG="${GITHUB_REF_NAME}"
+          OUTDIR="release/Limits_droper-${TAG}-linux-ubuntu"
+          mkdir -p "$OUTDIR"
+          cp qt_ui/build/limits_ui_qt "$OUTDIR/"
+          cp limits_helper "$OUTDIR/"
+          cp helper/com.limits_droper.helper.policy "$OUTDIR/"
+          cp README.md "$OUTDIR/"
+          tar -czf "Limits_droper-${TAG}-linux-ubuntu.tar.gz" -C release "Limits_droper-${TAG}-linux-ubuntu"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Limits_droper-*-linux-ubuntu.tar.gz
+
+  build-fedora:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build deps (Fedora)
+        run: |
+          dnf -y update
+          dnf -y install \
+            gcc \
+            gcc-c++ \
+            make \
+            cmake \
+            qt6-qtbase-devel
+
+      - name: Build CLI tools
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -o mchbar_read mchbar_read.c
+          gcc -std=c11 -Wall -Wextra -O2 -o mchbar_pl_write mchbar_pl_write.c
+          gcc -std=c11 -Wall -Wextra -O2 -o limits_ui limits_ui.c -lm
+          gcc -std=c11 -Wall -Wextra -O2 -o limits_helper helper/limits_helper.c -lm
+
+      - name: Build Qt UI
+        run: |
+          cmake -S qt_ui -B qt_ui/build
+          cmake --build qt_ui/build
+
+      - name: Package artifacts
+        run: |
+          set -e
+          TAG="${GITHUB_REF_NAME}"
+          OUTDIR="release/Limits_droper-${TAG}-linux-fedora"
+          mkdir -p "$OUTDIR"
+          cp qt_ui/build/limits_ui_qt "$OUTDIR/"
+          cp limits_helper "$OUTDIR/"
+          cp helper/com.limits_droper.helper.policy "$OUTDIR/"
+          cp README.md "$OUTDIR/"
+          tar -czf "Limits_droper-${TAG}-linux-fedora.tar.gz" -C release "Limits_droper-${TAG}-linux-fedora"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Limits_droper-*-linux-fedora.tar.gz
