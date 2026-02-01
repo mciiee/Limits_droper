@@ -1,0 +1,21 @@
+# Binaries
+/limits_ui
+/mchbar_read
+/mchbar_pl_write
+/limits_helper
+
+# Build outputs
+/qt_ui/build/
+/build/
+
+# Object files
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Editor/OS
+*.swp
+.DS_Store
