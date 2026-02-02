@@ -1,12 +1,15 @@
 # Binaries
-/limits_ui
-/mchbar_read
-/mchbar_pl_write
-/limits_helper
+limits_ui
+mchbar_read
+mchbar_pl_write
+limits_helper
 
 # Build outputs
-/qt_ui/build/
-/build/
+qt_ui/build/
+build/
+
+# cache
+.cache/
 
 # Object files
 *.o
@@ -19,3 +22,5 @@
 # Editor/OS
 *.swp
 .DS_Store
+.vscode/
+compile_commands.json
